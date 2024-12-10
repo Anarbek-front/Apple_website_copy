@@ -85,3 +85,5 @@ export const footerLinks = [
     "Legal",
     "Site Map",
 ];
+
+export const listDevicesNavigationBar = ["Phones", "Mackbooks", "Tablets"];
