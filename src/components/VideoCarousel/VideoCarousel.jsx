@@ -57,11 +57,27 @@ const VideoCarousel = () => {
     };
 
     useEffect(() => {
-        const currentProgress = 0;
+        let currentProgress = 0;
         let span = videoSpanRef.current;
         if (span[videoID]) {
             let anim = gsap.to(span[videoID], {
-                onUpdate: () => {},
+                onUpdate: () => {
+                    const progress = Math.ceil(anim.progress() * 100);
+                    if (progress !== currentProgress) {
+                        gsap.to(videoDivRef.current[videoID], {
+                            width:
+                                window.innerWidth < 760
+                                    ? "10vw"
+                                    : window.innerWidth < 1200
+                                    ? "10vw"
+                                    : "4vw",
+                        });
+                        gsap.to(span[videoID], {
+                            width: `${currentProgress}%`,
+                            backgroundColor: "#fff",
+                        });
+                    }
+                },
                 onComplete: () => {},
             });
         }
@@ -94,7 +110,7 @@ const VideoCarousel = () => {
                 break;
 
             default:
-                break;
+                return video;
         }
     };
 
