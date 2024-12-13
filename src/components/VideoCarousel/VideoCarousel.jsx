@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { hightlightsSlides } from "../../constants";
 import { gsap } from "gsap";
-import { pauseImg, playImg, replayImg } from "../../utils";
+import { highlightFirstVideo, pauseImg, playImg, replayImg } from "../../utils";
 import { useGSAP } from "@gsap/react";
 
 const VideoCarousel = () => {
@@ -78,8 +78,32 @@ const VideoCarousel = () => {
                         });
                     }
                 },
-                onComplete: () => {},
+                onComplete: () => {
+                    if (isPlaying) {
+                        gsap.to(videoDivRef.current(videoID), {
+                            width: "12px",
+                        });
+                        gsap.to(span[videoID], {
+                            backgroundColor: "#afafaf",
+                        });
+                    }
+                },
             });
+            if (videoID === 0) {
+                anim.restart();
+            }
+
+            const animUpdate = () => {
+                anim.progress(
+                    videoRef.current[videoID] /
+                        hightlightsSlides[videoID].videoDuration
+                );
+            };
+            if (isPlaying) {
+                gsap.ticker.add(animUpdate);
+            } else {
+                gsap.ticker.remove(animUpdate);
+            }
         }
     }, [videoID, startPlay]);
 
@@ -108,7 +132,6 @@ const VideoCarousel = () => {
                     isPlaying: !prevState.isPlaying,
                 }));
                 break;
-
             default:
                 return video;
         }
@@ -135,6 +158,11 @@ const VideoCarousel = () => {
                                     }}
                                     onLoadedMetadata={(e) =>
                                         handleLoadedMetadata(idx, e)
+                                    }
+                                    onEnded={() =>
+                                        idx !== 3
+                                            ? handleProcess("video-end", idx)
+                                            : handleProcess("video-last")
                                     }
                                 >
                                     <source src={list.video} type="video/mp4" />
