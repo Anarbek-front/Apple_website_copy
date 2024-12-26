@@ -22,6 +22,12 @@ const VideoCarousel = () => {
     const { isEnd, isLastVideo, isPlaying, startPlay, videoID } = video;
 
     useGSAP(() => {
+        gsap.to("#slider", {
+            transform: `translateX(${-100 * videoID}%)`,
+            duration: 2,
+            ease: "power2.inOut",
+        });
+
         gsap.to("#video", {
             scrollTrigger: {
                 trigger: "#video",
@@ -52,7 +58,7 @@ const VideoCarousel = () => {
         }
     }, [startPlay, videoID, isPlaying, loadedData]);
 
-    const handleLoadedMetadata = (i, e) => {
+    const handleLoadedMetadata = (idx, e) => {
         setLoadedData((pre) => [...pre, e]);
     };
 
@@ -64,6 +70,7 @@ const VideoCarousel = () => {
                 onUpdate: () => {
                     const progress = Math.ceil(anim.progress() * 100);
                     if (progress !== currentProgress) {
+                        currentProgress = progress;
                         gsap.to(videoDivRef.current[videoID], {
                             width:
                                 window.innerWidth < 760
@@ -74,17 +81,18 @@ const VideoCarousel = () => {
                         });
                         gsap.to(span[videoID], {
                             width: `${currentProgress}%`,
-                            backgroundColor: "#fff",
+                            backgroundColor: "#ffffff",
+                            borderRadius: "10px",
                         });
                     }
                 },
                 onComplete: () => {
                     if (isPlaying) {
-                        gsap.to(videoDivRef.current(videoID), {
+                        gsap.to(videoDivRef.current[videoID], {
                             width: "12px",
                         });
                         gsap.to(span[videoID], {
-                            backgroundColor: "#afafaf",
+                            backgroundColor: "#443f3f",
                         });
                     }
                 },
@@ -95,7 +103,7 @@ const VideoCarousel = () => {
 
             const animUpdate = () => {
                 anim.progress(
-                    videoRef.current[videoID] /
+                    videoRef.current[videoID].currentTime /
                         hightlightsSlides[videoID].videoDuration
                 );
             };
@@ -132,6 +140,12 @@ const VideoCarousel = () => {
                     isPlaying: !prevState.isPlaying,
                 }));
                 break;
+            case "pause":
+                setVideo((prevState) => ({
+                    ...prevState,
+                    isPlaying: !prevState.isPlaying,
+                }));
+                break;
             default:
                 return video;
         }
@@ -149,6 +163,9 @@ const VideoCarousel = () => {
                                     playsInline={true}
                                     muted
                                     preload="auto"
+                                    className={`${
+                                        list.id === 2 && "translate-x-44"
+                                    } pointer-events-none`}
                                     ref={(el) => (videoRef.current[idx] = el)}
                                     onPlay={() => {
                                         setVideo((prevVideo) => ({
