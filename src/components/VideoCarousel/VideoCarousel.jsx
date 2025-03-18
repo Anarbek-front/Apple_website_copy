@@ -1,13 +1,13 @@
-import React, { useEffect, useRef, useState } from "react";
-import { hightlightsSlides } from "../../constants";
-import { gsap } from "gsap";
-import { highlightFirstVideo, pauseImg, playImg, replayImg } from "../../utils";
-import { useGSAP } from "@gsap/react";
+import React, { useEffect, useRef, useState } from 'react'
+import { gsap } from 'gsap'
+import { useGSAP } from '@gsap/react'
+import { pauseImg, playImg, replayImg } from '../../utils'
+import { hightlightsSlides } from '../../constants'
 
 const VideoCarousel = () => {
-    const videoRef = useRef([]);
-    const videoSpanRef = useRef([]);
-    const videoDivRef = useRef([]);
+    const videoRef = useRef([])
+    const videoSpanRef = useRef([])
+    const videoDivRef = useRef([])
 
     const [video, setVideo] = useState({
         isEnd: false,
@@ -15,33 +15,33 @@ const VideoCarousel = () => {
         videoID: 0,
         isLastVideo: false,
         isPlaying: false,
-    });
+    })
 
-    const [loadedData, setLoadedData] = useState([]);
+    const [loadedData, setLoadedData] = useState([])
 
-    const { isEnd, isLastVideo, isPlaying, startPlay, videoID } = video;
+    const { isEnd, isLastVideo, isPlaying, startPlay, videoID } = video
 
     useGSAP(() => {
-        gsap.to("#slider", {
+        gsap.to('#slider', {
             transform: `translateX(${-100 * videoID}%)`,
             duration: 2,
-            ease: "power2.inOut",
-        });
+            ease: 'power2.inOut',
+        })
 
-        gsap.to("#video", {
+        gsap.to('#video', {
             scrollTrigger: {
-                trigger: "#video",
-                toggleActions: "restart none none none",
+                trigger: '#video',
+                toggleActions: 'restart none none none',
             },
             onComplete: () => {
                 setVideo((prevState) => ({
                     ...prevState,
                     startPlay: true,
                     isPlaying: true,
-                }));
+                }))
             },
-        });
-    }, [isEnd, videoID]);
+        })
+    }, [isEnd, videoID])
 
     useEffect(() => {
         // loadedData.length > 3
@@ -51,105 +51,106 @@ const VideoCarousel = () => {
         //     : "";
         if (loadedData.length > 3) {
             if (!isPlaying) {
-                videoRef.current[videoID].pause();
+                videoRef.current[videoID].pause()
             } else {
-                startPlay && videoRef.current[videoID].play();
+                startPlay && videoRef.current[videoID].play()
             }
         }
-    }, [startPlay, videoID, isPlaying, loadedData]);
+    }, [startPlay, videoID, isPlaying, loadedData])
 
     const handleLoadedMetadata = (idx, e) => {
-        setLoadedData((pre) => [...pre, e]);
-    };
+        setLoadedData((pre) => [...pre, e])
+    }
 
     useEffect(() => {
-        let currentProgress = 0;
-        let span = videoSpanRef.current;
+        let currentProgress = 0
+        let span = videoSpanRef.current
         if (span[videoID]) {
             let anim = gsap.to(span[videoID], {
                 onUpdate: () => {
-                    const progress = Math.ceil(anim.progress() * 100);
+                    const progress = Math.ceil(anim.progress() * 100)
                     if (progress !== currentProgress) {
-                        currentProgress = progress;
+                        currentProgress = progress
                         gsap.to(videoDivRef.current[videoID], {
                             width:
                                 window.innerWidth < 760
-                                    ? "10vw"
+                                    ? '10vw'
                                     : window.innerWidth < 1200
-                                    ? "10vw"
-                                    : "4vw",
-                        });
+                                    ? '10vw'
+                                    : '4vw',
+                        })
                         gsap.to(span[videoID], {
                             width: `${currentProgress}%`,
-                            backgroundColor: "#ffffff",
-                            borderRadius: "10px",
-                        });
+                            backgroundColor: '#ffffff',
+                            borderRadius: '10px',
+                        })
                     }
                 },
                 onComplete: () => {
                     if (isPlaying) {
                         gsap.to(videoDivRef.current[videoID], {
-                            width: "12px",
-                        });
+                            width: '12px',
+                        })
                         gsap.to(span[videoID], {
-                            backgroundColor: "#443f3f",
-                        });
+                            backgroundColor: '#443f3f',
+                        })
                     }
                 },
-            });
+            })
             if (videoID === 0) {
-                anim.restart();
+                anim.restart()
             }
 
             const animUpdate = () => {
+                // console.log(videoRef.current[videoID].currentTime)
                 anim.progress(
                     videoRef.current[videoID].currentTime /
                         hightlightsSlides[videoID].videoDuration
-                );
-            };
+                )
+            }
             if (isPlaying) {
-                gsap.ticker.add(animUpdate);
+                gsap.ticker.add(animUpdate)
             } else {
-                gsap.ticker.remove(animUpdate);
+                gsap.ticker.remove(animUpdate)
             }
         }
-    }, [videoID, startPlay]);
+    }, [videoID, startPlay])
 
     const handleProcess = (type, i) => {
         switch (type) {
-            case "video-end":
+            case 'video-end':
                 setVideo((prevState) => ({
                     ...prevState,
                     isEnd: true,
                     videoID: i + 1,
-                }));
-                break;
-            case "video-last":
-                setVideo((prevState) => ({ ...prevState, isLastVideo: true }));
-                break;
-            case "video-reset":
+                }))
+                break
+            case 'video-last':
+                setVideo((prevState) => ({ ...prevState, isLastVideo: true }))
+                break
+            case 'video-reset':
                 setVideo((prevState) => ({
                     ...prevState,
                     isLastVideo: false,
                     videoID: 0,
-                }));
-                break;
-            case "play":
+                }))
+                break
+            case 'play':
                 setVideo((prevState) => ({
                     ...prevState,
                     isPlaying: !prevState.isPlaying,
-                }));
-                break;
-            case "pause":
+                }))
+                break
+            case 'pause':
                 setVideo((prevState) => ({
                     ...prevState,
                     isPlaying: !prevState.isPlaying,
-                }));
-                break;
+                }))
+                break
             default:
-                return video;
+                return video
         }
-    };
+    }
 
     return (
         <>
@@ -164,22 +165,22 @@ const VideoCarousel = () => {
                                     muted
                                     preload="auto"
                                     className={`${
-                                        list.id === 2 && "translate-x-44"
+                                        list.id === 2 && 'translate-x-44'
                                     } pointer-events-none`}
                                     ref={(el) => (videoRef.current[idx] = el)}
                                     onPlay={() => {
                                         setVideo((prevVideo) => ({
                                             ...prevVideo,
                                             isPlaying: true,
-                                        }));
+                                        }))
                                     }}
                                     onLoadedMetadata={(e) =>
                                         handleLoadedMetadata(idx, e)
                                     }
                                     onEnded={() =>
                                         idx !== 3
-                                            ? handleProcess("video-end", idx)
-                                            : handleProcess("video-last")
+                                            ? handleProcess('video-end', idx)
+                                            : handleProcess('video-last')
                                     }
                                 >
                                     <source src={list.video} type="video/mp4" />
@@ -225,23 +226,23 @@ const VideoCarousel = () => {
                         }
                         alt={
                             isLastVideo
-                                ? "replay"
+                                ? 'replay'
                                 : !isPlaying
-                                ? "play"
-                                : "pause"
+                                ? 'play'
+                                : 'pause'
                         }
                         onClick={
                             isLastVideo
-                                ? () => handleProcess("video-reset")
+                                ? () => handleProcess('video-reset')
                                 : !isPlaying
-                                ? () => handleProcess("play")
-                                : () => handleProcess("pause")
+                                ? () => handleProcess('play')
+                                : () => handleProcess('pause')
                         }
                     />
                 </button>
             </div>
         </>
-    );
-};
+    )
+}
 
-export default VideoCarousel;
+export default VideoCarousel
